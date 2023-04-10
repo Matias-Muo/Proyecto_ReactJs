@@ -1,53 +1,54 @@
-import ItemList from "../ItemList";
-import Products from "../../mocks/products";
-import {useEffect, useState } from "react";
-import "./itemListContainer.css";
+import React, { useState, useEffect } from 'react';
+import { collection, getFirestore, getDocs, query, where } from 'firebase/firestore';
+import ItemList from '../ItemList';
+import './itemListContainer.css';
 
+function ItemListContainer({ greeting, categoryId, isCategoryRoute }) {
+  const [items, setItems] = useState([]);
 
+  useEffect(() => {
+    const db = getFirestore();
+    const itemsCollection = collection(db, 'items');
 
-function ItemListContainer ({ greeting,categoryId, isCategoryRoute}){
-
-
-    const [products, setProducts] = useState([]);
-
-    useEffect(() => {
-      const productsPromise = new Promise((resolve, reject) =>
-       setTimeout(() => resolve(Products), 2000)
-      ); 
-
-      productsPromise 
-        .then((response)=> {
-         if (isCategoryRoute) { 
-          const productsFiltered = response.filter(
-            (product) =>product.category === categoryId
+    if (isCategoryRoute) {
+      const queryResult = query(itemsCollection, where('category', '==', categoryId));
+      getDocs(queryResult)
+        .then((snapshot) => {
+          const docs = snapshot.docs;
+          setItems(
+            docs.map((doc) => ({
+              id: doc.id,
+              ...doc.data(),
+            }))
           );
-          setProducts (productsFiltered);
-         }else {
-          setProducts(response);
-         }
-
         })
-        .catch ((err) => console.log(err))
-      
-    }, [categoryId,isCategoryRoute]);
-    
-    return(
+        .catch((error) => console.log(error));
+    } else {
+      getDocs(itemsCollection)
+        .then((snapshot) => {
+          const docs = snapshot.docs;
+          setItems(
+            docs.map((doc) => ({
+              id: doc.id,
+              ...doc.data(),
+            }))
+          );
+        })
+        .catch((error) => alert(error));
+    }
+  }, [categoryId, isCategoryRoute]);
+
+
+  return (
     <div>
+      <div className="greeting">{greeting}</div>
 
-          <div>{greeting}</div>
-          <div>  
-            <h2 className= "titulo">Productos</h2>
-            <ItemList products={products} />
-          </div>
+      <div>
+       
+        <ItemList products={items} />
+      </div>
     </div>
-
-    ) ;
-   
-
+  );
 }
 
-
-
-
-
-export default ItemListContainer
+export default ItemListContainer;

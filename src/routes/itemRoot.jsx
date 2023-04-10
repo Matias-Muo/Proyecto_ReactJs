@@ -1,16 +1,18 @@
-import { useParams } from "react-router-dom";
-import NavBar from "../componentes/NavBar";
+import {useParams} from 'react-router-dom';
 import ItemDetailContainer from "../componentes/ItemDetailContainer";
+import { useContext } from 'react';
+import {CartContext} from '../../src/context/index'
+
 
 function ItemRoot(){
-    const parametro=useParams();
-    return(
-        <div>
-            
-            <NavBar/>
-            <h1 style={{fontSize:"20px"}} >Estoy en el item detail container</h1>
-            <ItemDetailContainer itemId={parametro.id}/>
-        </div>
+    const ContextValue=useContext(CartContext)
+    const parameters=useParams();
+
+        return (
+            <div>
+                <ItemDetailContainer itemId={parameters.id}/>
+       
+            </div>
     )
 }
 
